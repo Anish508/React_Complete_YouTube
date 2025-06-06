@@ -1,15 +1,14 @@
 import { useSelector } from "react-redux";
+import { useState } from "react";
 
 const BagSummary = () => {
+  const [showForm, setShowForm] = useState(false);
   const bagItemIds = useSelector((state) => state.bag);
   const items = useSelector((state) => state.items);
-  const finalItems = items.filter((item) => {
-    const itemIndex = bagItemIds.indexOf(item.id);
-    return itemIndex >= 0;
-  });
+  const finalItems = items.filter((item) => bagItemIds.includes(item.id));
 
   const CONVENIENCE_FEES = 99;
-  let totalItem = bagItemIds.length;
+  const totalItem = bagItemIds.length;
   let totalMRP = 0;
   let totalDiscount = 0;
 
@@ -18,12 +17,12 @@ const BagSummary = () => {
     totalDiscount += bagItem.original_price - bagItem.current_price;
   });
 
-  let finalPayment = totalMRP - totalDiscount + CONVENIENCE_FEES;
+  const finalPayment = totalMRP - totalDiscount + CONVENIENCE_FEES;
 
   return (
     <div className="bag-summary">
       <div className="bag-details-container">
-        <div className="price-header">PRICE DETAILS ({totalItem} Items) </div>
+        <div className="price-header">PRICE DETAILS ({totalItem} Items)</div>
         <div className="price-item">
           <span className="price-item-tag">Total MRP</span>
           <span className="price-item-value">₹{totalMRP}</span>
@@ -36,7 +35,7 @@ const BagSummary = () => {
         </div>
         <div className="price-item">
           <span className="price-item-tag">Convenience Fee</span>
-          <span className="price-item-value">₹99</span>
+          <span className="price-item-value">₹{CONVENIENCE_FEES}</span>
         </div>
         <hr />
         <div className="price-footer">
@@ -44,9 +43,21 @@ const BagSummary = () => {
           <span className="price-item-value">₹{finalPayment}</span>
         </div>
       </div>
-      <button className="btn-place-order">
+
+      <button className="btn-place-order" onClick={() => setShowForm(true)}>
         <div className="css-xjhrni">PLACE ORDER</div>
       </button>
+
+      {showForm && (
+        <form className="order-form">
+          <h3>Enter Your Details</h3>
+          <input type="text" placeholder="Full Name" required />
+          <input type="email" placeholder="Email Address" required />
+          <input type="tel" placeholder="Phone Number" required />
+          <textarea placeholder="Delivery Address" required></textarea>
+          <button type="submit" className="submit-order">Submit Order</button>
+        </form>
+      )}
     </div>
   );
 };

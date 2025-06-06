@@ -4,30 +4,36 @@ import { itemsActions } from "../store/itemsSlice";
 import { fetchStatusActions } from "../store/fetchStatusSlice";
 
 const FetchItems = () => {
-  const fetchStatus = useSelector((store) => store.fetchStatus);
+  const fetchDone = useSelector((store) => store.fetchStatus.fetchDone);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (fetchStatus.fetchDone) return;
+    if (fetchDone) return;
 
     const controller = new AbortController();
     const signal = controller.signal;
 
     dispatch(fetchStatusActions.markFetchingStarted());
-    fetch("http://localhost:8080/items", { signal })
+
+    fetch("http://localhost:5500/items", { signal })
       .then((res) => res.json())
       .then(({ items }) => {
         dispatch(fetchStatusActions.markFetchDone());
         dispatch(fetchStatusActions.markFetchingFinished());
         dispatch(itemsActions.addInitialItems(items[0]));
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Fetch error:", err);
+        }
       });
 
     return () => {
       controller.abort();
     };
-  }, [fetchStatus]);
+  }, [fetchDone]);
 
-  return <></>;
+  return null;
 };
 
 export default FetchItems;
